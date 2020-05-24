@@ -1,0 +1,48 @@
+{
+  "manifest_version": 1,
+  "id": "influxdb-bridge",
+  "name": "InfluxDB",
+  "short_name": "InfluxDB",
+  "version": "0.1.0",
+  "description": "Save your device states to an InfluxDB",
+  "homepage_url": "https://github.com/tim-hellhake/influxdb-bridge#readme",
+  "license": "MPL-2.0",
+  "author": "Tim Hellhake",
+  "gateway_specific_settings": {
+    "webthings": {
+      "exec": "{nodeLoader} {path}",
+      "strict_min_version": "0.10.0",
+      "strict_max_version": "*",
+      "primary_type": "adapter"
+    }
+  },
+  "options": {
+    "schema": {
+      "type": "object",
+      "required": [
+        "accessToken",
+        "host",
+        "port",
+        "database"
+      ],
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "title": "The access token for the gateway"
+        },
+        "host": {
+          "type": "string",
+          "title": "The hostname of the influxdb"
+        },
+        "port": {
+          "type": "integer",
+          "title": "The port of the influxdb"
+        },
+        "database": {
+          "type": "string",
+          "title": "The database to write to"
+        }
+      }
+    }
+  }
+}
