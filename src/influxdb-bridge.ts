@@ -21,7 +21,7 @@ export class InfluxDBBridge extends Adapter {
         this.connectToinflux();
     }
 
-    private connectToinflux() {
+    private async connectToinflux() {
         const {
             host,
             port,
@@ -35,6 +35,10 @@ export class InfluxDBBridge extends Adapter {
             port,
             database
         });
+
+        console.log('Create database if it does not exist');
+
+        await influxdb.createDatabase(database);
 
         this.connectToGateway(influxdb);
     }
