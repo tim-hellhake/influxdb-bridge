@@ -27,12 +27,12 @@
     "manifest.json"
   ],
   "dependencies": {
-    "influx": "^5.5.1",
+    "influx": "^5.5.2",
     "websocket": "^1.0.31",
     "webthings-client": "1.1.0"
   },
   "devDependencies": {
     "@types/websocket": "^1.0.0",
-    "typescript": "^3.9.2"
+    "typescript": "^3.9.5"
   }
 }
