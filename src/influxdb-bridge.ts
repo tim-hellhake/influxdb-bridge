@@ -25,15 +25,27 @@ export class InfluxDBBridge extends Adapter {
         const {
             host,
             port,
-            database
+            database,
+            username,
+            password
         } = this.manifest.moziot.config;
 
         console.log(`Connecting to influx at ${host}`);
 
+        let additionalProperties = {}
+
+        if (username && password) {
+            additionalProperties = {
+                username,
+                password
+            }
+        }
+
         const influxdb = new InfluxDB({
             host,
             port,
-            database
+            database,
+            ...additionalProperties
         });
 
         console.log('Create database if it does not exist');

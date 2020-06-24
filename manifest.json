@@ -41,6 +41,14 @@
         "database": {
           "type": "string",
           "title": "The database to write to"
+        },
+        "username": {
+          "type": "string",
+          "title": "The name of the user"
+        },
+        "password": {
+          "type": "string",
+          "title": "The password of the user"
         }
       }
     }
