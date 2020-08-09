@@ -4,7 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.*
  */
 
-import { Adapter, } from 'gateway-addon';
+import { Adapter, Device, Event } from 'gateway-addon';
 import { WebThingsClient } from 'webthings-client';
 import { client as WebSocketClient } from 'websocket';
 import { InfluxDB } from 'influx';
@@ -12,6 +12,27 @@ import { InfluxDB } from 'influx';
 interface ThingEvent {
     messageType: string,
     data: {}
+}
+
+class InfluxDBDevice extends Device {
+    constructor(adapter: Adapter) {
+        super(adapter, `influxdb`);
+        this['@context'] = 'https://iot.mozilla.org/schemas/';
+        this.name = 'InfluxDB';
+        this.description = 'InfluxDB device';
+
+        this.events.set('error', {
+            name: 'Error',
+            metadata: {
+                description: 'An error occured',
+                type: 'string'
+            }
+        });
+    }
+
+    public emitError() {
+        this.eventNotify(new Event(this, 'error'));
+    }
 }
 
 export class InfluxDBBridge extends Adapter {
@@ -59,12 +80,22 @@ export class InfluxDBBridge extends Adapter {
         console.log('Connecting to gateway');
 
         const {
-            accessToken
+            accessToken,
+            errorDevice,
+            errorCooldownTime
         } = this.manifest.moziot.config;
+
+        let influxDBDevice: InfluxDBDevice | undefined;
+
+        if (errorDevice) {
+            influxDBDevice = new InfluxDBDevice(this);
+            this.handleDeviceAdded(influxDBDevice);
+        }
 
         (async () => {
             const webThingsClient = await WebThingsClient.local(accessToken);
             const devices = await webThingsClient.getDevices();
+            let lastError = Date.now() / 1000;
 
             for (const device of devices) {
                 try {
@@ -96,9 +127,21 @@ export class InfluxDBBridge extends Adapter {
 
                                 if (thingEvent.messageType === 'propertyStatus') {
                                     if (Object.keys(thingEvent.data).length > 0) {
-                                        await influxdb.writeMeasurement(deviceId, [{
-                                            fields: thingEvent.data
-                                        }]);
+                                        try {
+                                            await influxdb.writeMeasurement(deviceId, [{
+                                                fields: thingEvent.data
+                                            }]);
+                                        } catch (e) {
+                                            console.log(`Could not write values: ${e}`);
+
+                                            const now = Date.now() / 1000;
+                                            const timeSinceError = now - lastError;
+
+                                            if (((errorCooldownTime || 15) * 60) < timeSinceError) {
+                                                influxDBDevice?.emitError();
+                                                lastError = now;
+                                            }
+                                        }
                                     }
                                 }
                             }

@@ -49,6 +49,14 @@
         "password": {
           "type": "string",
           "title": "The password of the user"
+        },
+        "errorDevice": {
+          "type": "boolean",
+          "title": "Enable device which emits error events"
+        },
+        "errorCooldownTime": {
+          "type": "number",
+          "title": "The time in minutes until another error event can be emitted"
         }
       }
     }
