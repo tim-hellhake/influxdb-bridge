@@ -5,12 +5,22 @@ services:
     image: grafana/grafana
     ports:
     - "3000:3000"
+#   Uncomment this if you want to use a specific storage location
+#   The directory must be writable for uid 472 (https://github.com/grafana/grafana/blob/b867050cfb1288557eebf78dca85a794c6ad42a0/Dockerfile#L39)
+#   Run `sudo chown -R 472 grafana` to change the owner of the folder
+#
+#   volumes:
+#    - /user/defined/path:/var/lib/grafana
     networks:
       - internal
   influxdb:
     image: influxdb
     ports:
       - "8086:8086"
+#   Uncomment this if you want to use a specific storage location
+#
+#   volumes:
+#    - /user/defined/path:/var/lib/influxdb
     networks:
       - internal
 
