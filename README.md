@@ -8,6 +8,10 @@
 
 Save your device states to an InfluxDB.
 
+In order to use this addon you need a running InfluxDB instance.
+
+The repo contains a docker-compose config (`docker-compose.yml`) which runs InfluxDB and Grafana locally.
+
 # How to use
 * Go to `settings/developer` and click `Create local authorization`
 * Create a new token and copy it
