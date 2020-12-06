@@ -6,13 +6,7 @@
 
 import { Adapter, Device, Event } from 'gateway-addon';
 import { WebThingsClient } from 'webthings-client';
-import { client as WebSocketClient } from 'websocket';
 import { InfluxDB } from 'influx';
-
-interface ThingEvent {
-    messageType: string,
-    data: {}
-}
 
 class InfluxDBDevice extends Device {
     constructor(adapter: Adapter) {
@@ -92,67 +86,28 @@ export class InfluxDBBridge extends Adapter {
             this.handleDeviceAdded(influxDBDevice);
         }
 
+        let lastError = Date.now() / 1000;
+
         (async () => {
             const webThingsClient = await WebThingsClient.local(accessToken);
-            const devices = await webThingsClient.getDevices();
-            let lastError = Date.now() / 1000;
-
-            for (const device of devices) {
+            await webThingsClient.connect();
+            webThingsClient.on('propertyChanged', async (deviceId, key, value) => {
                 try {
-                    const parts = device.href.split('/');
-                    const deviceId = parts[parts.length - 1];
-
-                    console.log(`Connecting to websocket of ${deviceId}`);
-                    const thingUrl = `ws://localhost:8080${device.href}`;
-                    const webSocketClient = new WebSocketClient();
-
-                    webSocketClient.on('connectFailed', function (error) {
-                        console.error(`Could not connect to ${thingUrl}: ${error}`)
-                    });
-
-                    webSocketClient.on('connect', function (connection) {
-                        console.log(`Connected to ${thingUrl}`);
-
-                        connection.on('error', function (error) {
-                            console.log(`Connection to ${thingUrl} failed: ${error}`);
-                        });
-
-                        connection.on('close', function () {
-                            console.log(`Connection to ${thingUrl} closed`);
-                        });
-
-                        connection.on('message', async function (message) {
-                            if (message.type === 'utf8' && message.utf8Data) {
-                                const thingEvent = <ThingEvent>JSON.parse(message.utf8Data);
-
-                                if (thingEvent.messageType === 'propertyStatus') {
-                                    if (Object.keys(thingEvent.data).length > 0) {
-                                        try {
-                                            await influxdb.writeMeasurement(deviceId, [{
-                                                fields: thingEvent.data
-                                            }]);
-                                        } catch (e) {
-                                            console.log(`Could not write values: ${e}`);
-
-                                            const now = Date.now() / 1000;
-                                            const timeSinceError = now - lastError;
-
-                                            if (((errorCooldownTime || 15) * 60) < timeSinceError) {
-                                                influxDBDevice?.emitError();
-                                                lastError = now;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                    });
-
-                    webSocketClient.connect(`${thingUrl}?jwt=${accessToken}`);
+                    await influxdb.writeMeasurement(deviceId, [{
+                        fields: { [key]: value }
+                    }]);
                 } catch (e) {
-                    console.log(`Could not process device ${device.title} ${e}`);
+                    console.log(`Could not write values: ${e}`);
+
+                    const now = Date.now() / 1000;
+                    const timeSinceError = now - lastError;
+
+                    if (((errorCooldownTime || 15) * 60) < timeSinceError) {
+                        influxDBDevice?.emitError();
+                        lastError = now;
+                    }
                 }
-            }
+            });
         })();
     }
 }
