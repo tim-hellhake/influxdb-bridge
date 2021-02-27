@@ -57,6 +57,10 @@
         "errorCooldownTime": {
           "type": "number",
           "title": "The time in minutes until another error event can be emitted"
+        },
+        "debug": {
+          "type": "boolean",
+          "title": "Enable debug logs"
         }
       }
     }

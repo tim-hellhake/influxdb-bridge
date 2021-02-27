@@ -76,7 +76,8 @@ export class InfluxDBBridge extends Adapter {
         const {
             accessToken,
             errorDevice,
-            errorCooldownTime
+            errorCooldownTime,
+            debug
         } = this.manifest.moziot.config;
 
         let influxDBDevice: InfluxDBDevice | undefined;
@@ -96,6 +97,10 @@ export class InfluxDBBridge extends Adapter {
                     await influxdb.writeMeasurement(deviceId, [{
                         fields: { [key]: value }
                     }]);
+
+                    if(debug) {
+                        console.log(`Wrote ${JSON.stringify({ [key]: value })} to ${deviceId}`);
+                    }
                 } catch (e) {
                     console.log(`Could not write values: ${e}`);
 
