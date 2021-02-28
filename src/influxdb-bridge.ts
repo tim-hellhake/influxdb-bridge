@@ -5,7 +5,7 @@
  */
 
 import { Adapter, Device, Event } from 'gateway-addon';
-import { WebThingsClient } from 'webthings-client';
+import { WebThingsClient, Property } from 'webthings-client';
 import { InfluxDB } from 'influx';
 
 class InfluxDBDevice extends Device {
@@ -91,29 +91,37 @@ export class InfluxDBBridge extends Adapter {
 
         (async () => {
             const webThingsClient = await WebThingsClient.local(accessToken);
-            await webThingsClient.connect();
-            console.log('Successfully connected to gateway');
-            webThingsClient.on('propertyChanged', async (deviceId, key, value) => {
-                try {
-                    await influxdb.writeMeasurement(deviceId, [{
-                        fields: { [key]: value }
-                    }]);
+            const devices = await webThingsClient.getDevices();
 
-                    if(debug) {
-                        console.log(`Wrote ${JSON.stringify({ [key]: value })} to ${deviceId}`);
+            for(const device of devices) {
+                const deviceId = device.id();
+                await device.connect();
+                console.log(`Successfully connected to ${device.description.title} (${deviceId})`);
+
+                device.on('propertyChanged', async (property: Property, value: any) => {
+                    const fields = {[property.name]: value};
+
+                    try {
+                        await influxdb.writeMeasurement(deviceId, [{
+                            fields
+                        }]);
+    
+                        if(debug) {
+                            console.log(`Wrote ${JSON.stringify(fields)} to ${deviceId}`);
+                        }
+                    } catch (e) {
+                        console.log(`Could not write ${JSON.stringify(fields)} to ${deviceId}: ${e}`);
+    
+                        const now = Date.now() / 1000;
+                        const timeSinceError = now - lastError;
+    
+                        if (((errorCooldownTime || 15) * 60) < timeSinceError) {
+                            influxDBDevice?.emitError();
+                            lastError = now;
+                        }
                     }
-                } catch (e) {
-                    console.log(`Could not write values: ${e}`);
-
-                    const now = Date.now() / 1000;
-                    const timeSinceError = now - lastError;
-
-                    if (((errorCooldownTime || 15) * 60) < timeSinceError) {
-                        influxDBDevice?.emitError();
-                        lastError = now;
-                    }
-                }
-            });
+                });
+            }
         })();
     }
 }
