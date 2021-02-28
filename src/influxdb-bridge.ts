@@ -92,6 +92,7 @@ export class InfluxDBBridge extends Adapter {
         (async () => {
             const webThingsClient = await WebThingsClient.local(accessToken);
             await webThingsClient.connect();
+            console.log('Successfully connected to gateway');
             webThingsClient.on('propertyChanged', async (deviceId, key, value) => {
                 try {
                     await influxdb.writeMeasurement(deviceId, [{
