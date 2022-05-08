@@ -74,7 +74,6 @@ export class InfluxDBBridge extends Adapter {
         console.log('Connecting to gateway');
 
         const {
-            accessToken,
             errorDevice,
             errorCooldownTime,
             debug
@@ -90,7 +89,7 @@ export class InfluxDBBridge extends Adapter {
         let lastError = Date.now() / 1000;
 
         (async () => {
-            const webThingsClient = await WebThingsClient.local(accessToken);
+            const webThingsClient = await this.createWebThingsClient(this.manifest.moziot.config);
             const devices = await webThingsClient.getDevices();
 
             for(const device of devices) {
@@ -123,5 +122,22 @@ export class InfluxDBBridge extends Adapter {
                 });
             }
         })();
+    }
+
+    private async createWebThingsClient(config: any) {
+      const {
+          accessToken,
+          gatewayPort,
+      } = config;
+
+      if (typeof gatewayPort === 'number' && gatewayPort !== 0) {
+        console.log(`Using gateway on port ${gatewayPort}`);
+
+        return new WebThingsClient('localhost', gatewayPort, accessToken);
+      } else {
+        console.log('Using local gateway');
+
+        return await WebThingsClient.local(accessToken);
+      }
     }
 }

@@ -30,6 +30,10 @@
           "type": "string",
           "title": "The access token for the gateway"
         },
+        "gatewayPort": {
+          "type": "integer",
+          "title": "The port of the gateway"
+        },
         "host": {
           "type": "string",
           "title": "The hostname of the influxdb"
