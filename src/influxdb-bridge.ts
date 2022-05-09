@@ -33,10 +33,10 @@ export class InfluxDBBridge extends Adapter {
     constructor(addonManager: any, private manifest: any) {
         super(addonManager, InfluxDBBridge.name, manifest.name);
         addonManager.addAdapter(this);
-        this.connectToinflux();
+        this.connectToInflux();
     }
 
-    private async connectToinflux() {
+    private async connectToInflux() {
         const {
             host,
             port,
