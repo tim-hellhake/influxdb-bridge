@@ -8,7 +8,7 @@
   "scripts": {
     "prettier": "npx prettier -w 'src/*.ts'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -p ."
+    "build": "node generate-config-interfaces.js && tsc -p ."
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
   ],
   "dependencies": {
     "influx": "^5.7.0",
+    "json-schema-to-typescript": "^10.1.5",
     "websocket": "^1.0.33",
     "webthings-client": "4.1.0"
   },

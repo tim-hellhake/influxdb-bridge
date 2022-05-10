@@ -7,6 +7,7 @@
 import { Adapter, Device, Event } from 'gateway-addon';
 import { WebThingsClient, Property } from 'webthings-client';
 import { InfluxDB } from 'influx';
+import { Config } from './config';
 
 class InfluxDBDevice extends Device {
   constructor(adapter: Adapter) {
@@ -116,7 +117,7 @@ export class InfluxDBBridge extends Adapter {
     })();
   }
 
-  private async createWebThingsClient(config: any) {
+  private async createWebThingsClient(config: Config) {
     const { accessToken, gatewayPort } = config;
 
     if (typeof gatewayPort === 'number' && gatewayPort !== 0) {
