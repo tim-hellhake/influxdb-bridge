@@ -4,10 +4,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.*
  */
 
-import { Adapter, Device, Event } from 'gateway-addon';
+import { Adapter, AddonManagerProxy, Device, Event } from 'gateway-addon';
 import { WebThingsClient, Property } from 'webthings-client';
 import { InfluxDB } from 'influx';
 import { Config } from './config';
+import { Manifest } from './manifest';
 
 class InfluxDBDevice extends Device {
   constructor(adapter: Adapter) {
@@ -25,19 +26,19 @@ class InfluxDBDevice extends Device {
     });
   }
 
-  public emitError() {
+  public emitError(): void {
     this.eventNotify(new Event(this, 'error'));
   }
 }
 
 export class InfluxDBBridge extends Adapter {
-  constructor(addonManager: any, private manifest: any) {
+  constructor(addonManager: AddonManagerProxy, private manifest: Manifest) {
     super(addonManager, InfluxDBBridge.name, manifest.name);
     addonManager.addAdapter(this);
     this.connectToInflux();
   }
 
-  private async connectToInflux() {
+  private async connectToInflux(): Promise<void> {
     const { host, port, database, username, password } = this.manifest.moziot.config;
 
     console.log(`Connecting to influx at ${host}`);
@@ -65,7 +66,7 @@ export class InfluxDBBridge extends Adapter {
     this.connectToGateway(influxdb);
   }
 
-  private connectToGateway(influxdb: InfluxDB) {
+  private connectToGateway(influxdb: InfluxDB): void {
     console.log('Connecting to gateway');
 
     const { errorDevice, errorCooldownTime, debug } = this.manifest.moziot.config;
@@ -88,7 +89,7 @@ export class InfluxDBBridge extends Adapter {
         await device.connect();
         console.log(`Successfully connected to ${device.description.title} (${deviceId})`);
 
-        device.on('propertyChanged', async (property: Property, value: any) => {
+        device.on('propertyChanged', async (property: Property, value: unknown) => {
           const fields = { [property.name]: value };
 
           try {
@@ -117,7 +118,7 @@ export class InfluxDBBridge extends Adapter {
     })();
   }
 
-  private async createWebThingsClient(config: Config) {
+  private async createWebThingsClient(config: Config): Promise<WebThingsClient> {
     const { accessToken, gatewayPort } = config;
 
     if (typeof gatewayPort === 'number' && gatewayPort !== 0) {

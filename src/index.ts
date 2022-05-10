@@ -4,6 +4,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.*
  */
 
+import { AddonManagerProxy } from 'gateway-addon';
 import { InfluxDBBridge } from './influxdb-bridge';
+import { Manifest } from './manifest';
 
-export = (addonManager: any, manifest: any) => new InfluxDBBridge(addonManager, manifest);
+export = function (addonManager: AddonManagerProxy, manifest: Manifest): void {
+  new InfluxDBBridge(addonManager, manifest);
+};
