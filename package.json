@@ -1,7 +1,7 @@
 {
   "name": "influxdb-bridge",
   "display_name": "InfluxDB",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Save your device states to an InfluxDB",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
