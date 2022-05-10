@@ -5,36 +5,36 @@
  */
 
 declare module 'gateway-addon' {
-    class Event {
-        constructor(device: any, name: string, data?: any);
-    }
+  class Event {
+    constructor(device: any, name: string, data?: any);
+  }
 
-    interface EventDescription {
-        name: string;
-        metadata: EventMetadata;
-    }
+  interface EventDescription {
+    name: string;
+    metadata: EventMetadata;
+  }
 
-    interface EventMetadata {
-        description: string,
-        type: string
-    }
+  interface EventMetadata {
+    description: string;
+    type: string;
+  }
 
-    class Device {
-        protected '@context': string;
-        protected '@type': string[];
-        public id: string;
-        public name: string;
-        protected description: string;
+  class Device {
+    protected '@context': string;
+    protected '@type': string[];
+    public id: string;
+    public name: string;
+    protected description: string;
 
-        constructor(adapter: Adapter, id: string);
+    constructor(adapter: Adapter, id: string);
 
-        public events: Map<String, EventDescription>;
-        public eventNotify(event: Event): void;
-    }
+    public events: Map<String, EventDescription>;
+    public eventNotify(event: Event): void;
+  }
 
-    class Adapter {
-        constructor(addonManager: any, id: string, packageName: string);
+  class Adapter {
+    constructor(addonManager: any, id: string, packageName: string);
 
-        public handleDeviceAdded(device: Device): void;
-    }
+    public handleDeviceAdded(device: Device): void;
+  }
 }
