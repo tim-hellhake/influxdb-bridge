@@ -12,10 +12,10 @@ class InfluxDBDevice extends Device {
   constructor(adapter: Adapter) {
     super(adapter, `influxdb`);
     this['@context'] = 'https://iot.mozilla.org/schemas/';
-    this.name = 'InfluxDB';
-    this.description = 'InfluxDB device';
+    this.setTitle('InfluxDB');
+    this.setDescription('InfluxDB device');
 
-    this.events.set('error', {
+    this.addEvent('error', {
       name: 'Error',
       metadata: {
         description: 'An error occured',
